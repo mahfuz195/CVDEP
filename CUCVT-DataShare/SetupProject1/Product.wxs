@@ -11,10 +11,20 @@
 		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
 		<MediaTemplate />
 
+    <WixVariable Id="WixUIBannerBmp" Value="Images\topBanner2.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="Images\banner2.bmp" />
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.ProjectDir)\License.rtf" />
+    
+    
 		<Feature Id="ProductFeature" Title="CV Toolkit" Level="1">
 			<ComponentGroupRef Id="ProductComponents" />
 			<ComponentGroupRef Id="Images_files" />
 			<ComponentGroupRef Id="Resources_files" />
+
+      <ComponentRef Id="ApplicationShortcut" />
+      <ComponentRef Id="ApplicationShortcutDesktop" />
+      
+      
 		</Feature>
 	</Product>
 
@@ -27,7 +37,11 @@
 				  <Directory Id="Resources" Name="Resources" />
 				</Directory>
 			</Directory>
-		</Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="CV Toolkit" />
+      </Directory>
+      <Directory Id="DesktopFolder" Name="CV Toolkit" />
+     </Directory>
 	</Fragment>
 
 	<Fragment>
@@ -77,4 +91,23 @@
       </Component>
     </ComponentGroup>
   </Fragment>
+
+  <Fragment>
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="ApplicationShortcut" Guid="ccc37b23-2395-4a49-a96f-f26d52696b7e">
+        <Shortcut Id="ApplicationStartMenuShortcut" Name="CV Toolkit" Description="Data sharing platform for CU-CVT" 
+                  Target="[INSTALLFOLDER]OpenStreetMap_CV-Toolkit.exe" WorkingDirectory="APPLICATIONROOTDIRECTORY" />
+        <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\CV Toolkit" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="DesktopFolder">
+      <Component Id="ApplicationShortcutDesktop" Guid="7b6d00f5-5596-4c99-845b-99f7fbbbdd63">
+        <Shortcut Id="ApplicationDesktopShortcut" Name="CV Toolkit" Description="CV Toolkit" 
+                  Target="[INSTALLFOLDER]OpenStreetMap_CV-Toolkit.exe" WorkingDirectory="INSTALLFOLDER" />
+        <RemoveFolder Id="RemoveDesktopFolder" Directory="DesktopFolder" On="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\CV Toolkit" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+  </Fragment>  
 </Wix>

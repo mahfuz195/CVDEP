@@ -6,7 +6,7 @@
     <ProductVersion>3.10</ProductVersion>
     <ProjectGuid>5c9a98c1-4496-4308-8f53-18bd28bf003d</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>SetupProject1</OutputName>
+    <OutputName>Setup</OutputName>
     <OutputType>Package</OutputType>
     <Name>Setup</Name>
   </PropertyGroup>
@@ -23,9 +23,12 @@
     <Compile Include="Product.wxs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Images\banner2.bmp" />
     <Content Include="Images\logo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Images\topBanner2.bmp" />
+    <Content Include="License.rtf" />
     <Content Include="Setup.wax" />
   </ItemGroup>
   <ItemGroup>

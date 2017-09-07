@@ -16,6 +16,7 @@ using System.Net.Sockets;
 using System.IO;
 using Json;
 using Newtonsoft.Json;
+using rtChart;
 
 namespace OpenStreetMap_CV_Toolkit
 {
@@ -26,14 +27,56 @@ namespace OpenStreetMap_CV_Toolkit
         Dictionary<float, RootObject> dictionary;
         Dictionary<float, GMarkerGoogle> dictionary_marker;
         Dictionary<float, int> carId_to_chart_index_mapper;
+        Dictionary<float, double> carId_speed_mapper;
         bool isConnectionClose = false;
+
+        public double init_velocity_time = 0.0;
+        public double current_time = 0.0;
+
+        private double[] value_array = new double[30];
+
+        long x_axis_max = 0;
+        long x_axis_min = 0;
+        long y_axis_max = 0;
+        long y_axis_min = 0;
+
+        String server_ip = "130.127.198.22";
+        int server_port = 8989;
+
+        kayChart kay_chart;
+
+        public long X_RANGE = 20; 
+       
         public Form1()
         {
             InitializeComponent();
+            init_config();
+            //kay_chart = new kayChart(chart2, 20);
+            
+
+            chart1.ChartAreas[0].CursorX.IsUserEnabled = true;
+            chart1.ChartAreas[0].CursorX.AutoScroll = true;
+
+            chart1.ChartAreas[0].AxisX.ScaleView.Zoomable = true;
+            chart1.ChartAreas[0].AxisX.ScrollBar.IsPositionedInside = true;
+
+
+            chart1.ChartAreas[0].AxisX.Maximum = X_RANGE;
+            chart1.ChartAreas[0].AxisX.Minimum = 0; 
+
+
+
             dictionary = new Dictionary<float, RootObject>();
             dictionary_marker = new Dictionary<float, GMarkerGoogle>();
             carId_to_chart_index_mapper = new Dictionary<float, int>();
-            gmap.MapProvider = GMapProviders.OpenStreetMap;
+            carId_speed_mapper = new Dictionary<float, double>();
+            gmap.MapProvider = GMapProviders.GoogleChinaSatelliteMap;
+            
+            //listBox1.ValueMember = "Key";
+            //listBox1.DisplayMember = "Value";
+            carId_speed_mapper.Add(100, 24);
+            //listBox1.DataSource = new BindingSource(carId_speed_mapper, null);
+            
 
             // Jervy gym RSU locaiton : 34.678986, -82.847704
             // C1 parking lot locaiton : 34.671500, -82.830270
@@ -103,6 +146,30 @@ namespace OpenStreetMap_CV_Toolkit
             //chart1.Series[1].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
         }
 
+        private void init_config()
+        {
+            string line;
+            String directory = System.IO.Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
+            try
+            {
+                StreamReader sr = new StreamReader(directory + "config.txt");
+                line = sr.ReadLine();
+                if (line != null)
+                {
+                    char[] delimiterChars = { ' ', ',', ':', '\t' };
+                    string[] words = line.Split(delimiterChars);
+                    if (words.Length >=2)
+                    {
+                        server_ip = words[0];
+                        server_port = Convert.ToInt32(words[1]);
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Error in config file");
+            }
+        }
         private void Form1_Load(object sender, EventArgs e)
         {
             gmap.DragButton = MouseButtons.Left;
@@ -112,7 +179,6 @@ namespace OpenStreetMap_CV_Toolkit
             GMap.NET.GMaps.Instance.Mode = GMap.NET.AccessMode.ServerOnly;
             gmap.SetPositionByKeywords("Clemson, South Carolina");
             gmap.Position = new PointLatLng(34.675455, -82.840624);
-            
             //GMap.NET.Mar
         }
 
@@ -120,19 +186,31 @@ namespace OpenStreetMap_CV_Toolkit
         {
             Application.Exit();
         }
-        static int counter = 0; 
+        static int counter = 20; 
         private void timer1_Tick(object sender, EventArgs e)
         {
             Random rand = new Random();
             double value = (double)rand.Next(0, 100); ///1000.0;
             //marker.Position = new PointLatLng(34.875455+value, -82.840624);
             Console.WriteLine("Ticker running : " + value);
-           // chart1.Series[0].Points.AddXY(counter, value);
+            //chart2.Series[0].Points.AddXY(counter-19, value);
 
             value = (double)rand.Next(0, 100);
-           // chart1.Series[1].Points.AddXY(counter, value);
+            // chart1.Series[1].Points.AddXY(counter, value);
+            //kay_chart.updateChart()
+            //kay_chart.TriggeredUpdate(value);
+            //kay_chart.updateChart
+            // chart2.Series[0].Points.AddXY(counter, value);
 
+            //Series mySeries = chart1.Series[0];
+            //Point dp2 = new Point(counter, rand.Next(100));
+            //chart1.ChartAreas[0].AxisX.Maximum = counter;
+            //chart1.ChartAreas[0].AxisX.Minimum = counter - 20;
             counter++;
+
+
+            //for(int i = 0; i < chart1.Series[0].LegendText.)
+
         }
 
         private void bt_start_Click(object sender, EventArgs e)
@@ -148,7 +226,7 @@ namespace OpenStreetMap_CV_Toolkit
             TcpClient client = null;
             try
             {
-                client = new TcpClient("130.127.198.22", 8989);
+                client = new TcpClient(server_ip,server_port);
                 isConnectionClose = false;
             }
             catch(Exception er)
@@ -174,6 +252,25 @@ namespace OpenStreetMap_CV_Toolkit
                             RootObject root = JsonConvert.DeserializeObject<RootObject>(line);
                             Console.WriteLine("Car id : " + root.carid + " : speed : " + root.speed);
 
+                            double time_count = 0.0;
+                            if (init_velocity_time == 0.0)
+                            {
+                                if (Double.TryParse(root.timestamp, out current_time))
+                                {
+                                    init_velocity_time = current_time;
+                                }
+                                else
+                                {
+                                    Func<int> del2 = delegate ()
+                                    {
+                                        textBox_others.AppendText("Error in converting the timestamp" + Environment.NewLine);
+                                        return 0;
+                                    };
+                                    BeginInvoke(del2);
+                                }
+
+                            }
+
                             if (!dictionary.ContainsKey(root.carid))
                             {
                                 dictionary.Add(root.carid, root);
@@ -186,6 +283,10 @@ namespace OpenStreetMap_CV_Toolkit
                                 marker.ToolTipMode = MarkerTooltipMode.Always;
                                 marker.ToolTipText = ((int)(Math.Round(root.speed, 2) * 2.23694)).ToString() + "mph";
                                 dictionary_marker.Add(root.carid, marker);
+                                carId_speed_mapper.Add(root.carid, root.speed * 2.23694);
+                                //listBox1.Items.Clear();
+                                //listBox1.DataSource = new BindingSource(carId_speed_mapper,null);
+
                                 //marker.ToolTip.Marker.Size = ;
 
                                 Func<int> del = delegate ()
@@ -204,14 +305,40 @@ namespace OpenStreetMap_CV_Toolkit
                                 dictionary[root.carid] = root;
                                 dictionary_marker[root.carid].Position = new PointLatLng(root.latitude, root.longitude);
                                 dictionary_marker[root.carid].ToolTipText = ((int)(Math.Round(root.speed, 2) * 2.23694)).ToString() + "mph";
+                                carId_speed_mapper[root.carid]= (root.speed * 2.23694);
 
-                                Func<int> del = delegate ()
+                                if (Double.TryParse(root.timestamp,out current_time))
                                 {
-                                    chart1.Series[carId_to_chart_index_mapper[root.carid]].Points.AddXY(counter, root.speed);
-                                    return 0;
-                                };
-                                BeginInvoke(del);
+                                    time_count = current_time - init_velocity_time;
+                                    double time_in_seconds = time_count / 1000.0;
+                                    Func<int> del = delegate ()
+                                    {
+                                        chart1.Series[carId_to_chart_index_mapper[root.carid]].Points.AddXY(time_count/1000.0, root.speed * 2.23694);
+                                        value_array[value_array.Length - 1] = root.speed * 2.26;
+                                        Array.Copy(value_array, 1, value_array,0, value_array.Length - 1);
+                                       
+                                        if (root.speed> y_axis_max)
+                                        {
+                                            y_axis_max = (long)root.speed + 1 ;
+                                            chart1.ChartAreas[0].RecalculateAxesScale();
+                                            //chart1.ChartAreas[0].AxisX.Minimum = time_count / 1000.0 - 20;
+                                            //chart1.ChartAreas[0].RecalculateAxesScale();
+                                            //chart1.ChartAreas[0].AxisY.Maximum = (double)y_axis_max + 5;
+                                            
+                                        }
+                                        if (time_in_seconds >= X_RANGE)
+                                        {
+                                            chart1.ChartAreas[0].AxisX.Minimum = (long)time_in_seconds - X_RANGE;
+                                            chart1.ChartAreas[0].AxisX.Maximum = (long)time_in_seconds + 1;
+                                            //chart1.Series[0].Label = "Y = #VALY\nX = #VALX"
+                                        }
+                                        //listBox1.Items.Clear();
+                                        //listBox1.DataSource = new BindingSource(carId_speed_mapper, null);
 
+                                        return 0;
+                                    };
+                                    BeginInvoke(del);
+                                }
                             }
                         }
                         else if (line.Contains("eventid"))
