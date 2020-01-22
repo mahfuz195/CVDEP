@@ -1,2 +1,2 @@
-# CV-Toolkit
-This is the code for Data sharing platform of Clemson University Connected Vehicle Testbed (CU-CVT).
+# Connected Vehicle Application Development Platform
+This is the code and software for Connected Vehicle Application Development Platform for Clemson University Connected Vehicle Testbed (CU-CVT).
