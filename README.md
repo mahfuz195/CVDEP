@@ -1,7 +1,7 @@
 # Connected Vehicle Application Development Platform
 This is the code and software for Connected Vehicle Application Development Platform for Clemson University Connected Vehicle Testbed (CU-CVT).
 
-The developnemt of the CVDeP is done following the archtecture published here: https://arxiv.org/abs/1812.11648
+The developnemt of the CVDeP is done following the architecture published here: https://arxiv.org/abs/1812.11648
 
 ### Instructions
 
