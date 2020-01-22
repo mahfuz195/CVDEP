@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CV-Toolkit", "OpenStreetMap_CV-Toolkit\CV-Toolkit.csproj", "{00B27C57-6C2E-401B-9042-185D8E0EEF0E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CVDEP", "OpenStreetMap_CV-Toolkit\CVDEP.csproj", "{00B27C57-6C2E-401B-9042-185D8E0EEF0E}"
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "Setup", "SetupProject1\Setup.wixproj", "{5C9A98C1-4496-4308-8F53-18BD28BF003D}"
 EndProject
