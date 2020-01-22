@@ -6,4 +6,8 @@ This is the code and software for Connected Vehicle Application Development Plat
 Clone the project and open the CVDEP.sln project file using Visual Studio 2015. 
 Compile and run the project. 
 
+### Contact Information
+Please contact mdmhafi@clemson.edu for any questions and suggestions. 
+
+
 
